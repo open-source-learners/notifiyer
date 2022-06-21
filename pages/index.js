@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
+import Typewriter from 'typewriter-effect';
 /**
  * get the data from api and pass it to the component
  * 
@@ -9,7 +10,7 @@ export async function getServerSideProps() {
   const issuesData = await res.json();
 
   return {
-    props: { issuesData },
+    props: { issuesData }, 
   } // return the data to the component
 }
 export default function Home({ issuesData }) {
@@ -22,9 +23,17 @@ export default function Home({ issuesData }) {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to daily issue
-        </h1>
+ <Typewriter
+  options={{
+    strings: [`<h1 className={styles.title}>
+    Welcome to daily issue
+  </h1>`, `<h1 className={styles.title}>
+  to keep track of your daily issues
+</h1>`],
+    autoStart: true, 
+    loop: true,
+  }}
+/>
         <p>{issuesData.name}</p>
         <p>{issuesData.author}</p>
         <p>{issuesData.labels.join(", ")}</p>
