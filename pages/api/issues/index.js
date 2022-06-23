@@ -1,20 +1,55 @@
 import { Octokit} from "octokit"; 
+import  fs from "fs";
+import path from "path";
+// import { send } from "process";
+import { Novu } from "@novu/node";
+/** midleware */
+const novu = new Novu(process.env.NOVU_TOKEN);
 
 export default async function handler(req, res) {
-    const octokit = new Octokit();
+    const { send } = req.query;
     const q = "is:open is:issue label:good-first-issue";
-
+    
+    const octokit = new Octokit();
+/** search github server */
     const response = await octokit.request("GET /search/issues", { q });
+    
     const results = response.data.items.map((item) => ({
-    name: item.title,
+    title: item.title,
     author: item.user.login,
-    /** 
-     * labels is an array of objects so we need to use map to get the name of the label
-     */
     labels: item.labels.map((label) => label.name),
     url: item.html_url,        
     }));
+
     const random = Math.floor(Math.random() * results.length + 1);
-    res.status(200).json(results[random]); 
-  };
+    const issue = results[random];
+/**
+ *  novu instialzation
+ */
+if(send){
+  const files = fs.readdirSync(path.resolve("data"));
+  const users = files.map((file)=>({
+    ...JSON.parse(fs.readFileSync(path.resolve("data", file), "utf8")),
+    file
+   }));
+  /** to the email now */
+  console.log(users);
+  users.forEach((user) =>{
+    novu.trigger('good-first-issue',{ 
+      to:{
+        subscriberId: user.email,
+        email: user.email,
+      },
+      payload:{
+        name: user.name,
+          title: issue.title,
+          author: issue.author,
+          labels: issue.labels.join(", "),
+          url: issue.url,
+      }
+    })
+  })
+}
+res.status(200).json(issue);  
+};
   

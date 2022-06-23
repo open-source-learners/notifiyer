@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@novu/node": "^0.4.1",
     "next": "12.1.6",
     "octokit": "^1.8.0",
     "react": "18.2.0",
